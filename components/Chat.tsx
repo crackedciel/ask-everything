@@ -10,6 +10,7 @@ import { Message } from "@/types/types";
 import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
+import { useAgentContext } from "@/hooks/useAgentContext";
 import ERC725 from "@erc725/erc725.js";
 import {Message as AIMessage} from '../app/api/types/ai'
 import erc725schema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
@@ -54,7 +55,7 @@ export function Chat() {
   const firstMessage = useAppSelector(state => state.chat.firstMessage);
   const messages: Message[] = useAppSelector(state => state.room.messages[roomId] || []);
 
-  const { accounts, contextAccounts } =
+  const { accounts, contextAccounts, chainId } =
     useUpProvider();
   const messageListContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -63,6 +64,9 @@ export function Chat() {
 
   // Initialize AI hook
   const { sendMessage: sendToAI, isLoading: isAILoading, response, error: aiError } = useApi();
+  
+  // Get agent context from blockchain
+  const { agentContext, isLoading: isContextLoading } = useAgentContext(contextAccounts?.[0], chainId || 0);
 
   const scrollToMessageListBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     setTimeout(() => {
@@ -174,10 +178,7 @@ export function Chat() {
         content,
       });
 
-      // Get agent context if available
-      const agentContext = typeof window !== 'undefined' ? localStorage.getItem("agentContext") || "" : "";
-      
-      // Add system context if available
+      // Add system context if available from blockchain
       if (agentContext) {
         conversationHistory.unshift({
           role: 'system',
@@ -195,7 +196,7 @@ export function Chat() {
     } finally {
       scrollToMessageListBottom();
     }
-  }, [dispatchAddMessage, scrollToMessageListBottom, accounts, messages, sendToAI, contextAccounts]);
+  }, [dispatchAddMessage, scrollToMessageListBottom, accounts, messages, sendToAI, contextAccounts, agentContext, userData.imgUrl, userData.fullName]);
 
   const navigateToSettings = () => {
     router.push('/settings');

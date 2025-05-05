@@ -16,16 +16,12 @@ export function SettingsContent() {
   const [isLoading, setIsLoading] = useState(true);
   const { accounts, client, chainId } = useUpProvider();
 
-  // Load context from both localStorage and blockchain
+  // Load context only from blockchain
   useEffect(() => {
     async function loadContext() {
       setIsLoading(true);
       try {
-        // First load from localStorage 
-        const localContext = localStorage.getItem("agentContext") || "";
-        setAgentContext(localContext);
-        
-        // Then try to load from blockchain if account is available
+        // Only load from blockchain if account is available
         if (accounts?.[0]) {
           const publicClient = createPublicClient({
             chain: chainId === 42 ? lukso : luksoTestnet,
@@ -47,7 +43,6 @@ export function SettingsContent() {
               if (dataString && dataString.trim()) {
                 console.log("Loaded context from blockchain:", dataString);
                 setAgentContext(dataString);
-                localStorage.setItem("agentContext", dataString);
               }
             }
           } catch (error) {
@@ -66,15 +61,8 @@ export function SettingsContent() {
 
   const handleSave = async () => {
     try {
-      // Save to localStorage
-      localStorage.setItem("agentContext", agentContext);
-      console.log('before here')
-      console.log(client)
-      console.log(accounts)
       // If we have an account and client, save to blockchain
       if (accounts?.[0] && client) {
-        console.log('jhere');
-
         setIsSaving(true);
         
         // Prepare transaction data
@@ -89,9 +77,14 @@ export function SettingsContent() {
         });
         
         console.log("Transaction sent:", hash);
+        
+        // Wait for a brief moment to ensure transaction is processed
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        router.back();
+      } else {
+        alert("Account or client not available. Cannot save to blockchain.");
       }
-      
-      router.back();
     } catch (error) {
       console.error("Error saving context:", error);
       alert("Failed to save context to blockchain");
