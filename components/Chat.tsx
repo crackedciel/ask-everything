@@ -4,12 +4,14 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import ChatInput from "./chat/ChatInput";
 import { MessageList } from "./chat/message/MessageList";
 import { useUpProvider } from "./upProvider";
-import {  addMessage, selectAllMessages, setMessages } from "@/store/room-reducer";
+import { addMessage, selectAllMessages, setMessages } from "@/store/room-reducer";
 import { useRef, useCallback, useEffect, useState } from "react";
 import { Message } from "@/types/types";
 import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ERC725 } from '@erc725/erc725.js';
+import { useApi } from "@/hooks/useApi";
+import ERC725 from "@erc725/erc725.js";
+import {Message as AIMessage} from '../app/api/types/ai'
 import erc725schema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 
 export function Chat() {
@@ -59,6 +61,9 @@ export function Chat() {
   const isLoadingMessages = false; 
   const isOwner = accounts && contextAccounts && accounts[0] === contextAccounts[0];
 
+  // Initialize AI hook
+  const { sendMessage: sendToAI, isLoading: isAILoading, response, error: aiError } = useApi();
+
   const scrollToMessageListBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     setTimeout(() => {
       messageListContainerRef.current?.scrollTo({
@@ -70,7 +75,7 @@ export function Chat() {
 
   const dispatchAddMessage = useCallback((message: Message) => {
     dispatch(addMessage({ message, roomId }));
-  }, [dispatch]);
+  }, [dispatch, roomId]);
 
   const removeLoadingMessage = useCallback(() => {
     dispatch((dispatch, getState) => {
@@ -78,7 +83,45 @@ export function Chat() {
       const newMessages = currentMessages.filter(message => !message.isLoading);
       dispatch(setMessages({roomId, messages: newMessages}));
     });
-  }, [dispatch]);
+  }, [dispatch, roomId]);
+
+  // Handle AI response
+  useEffect(() => {
+    if (response?.content) {
+      removeLoadingMessage();
+      
+      const aiMessage: Message = {
+        id: `ai-${(Math.random() * 1e6)}`,
+        roomId,
+        content: response.content,
+        address: 'Agoria', // AI identifier 
+        timestamp: new Date().toISOString(),
+        isAssistant: true,
+      };
+      
+      dispatchAddMessage(aiMessage);
+      scrollToMessageListBottom();
+    }
+  }, [response, dispatchAddMessage, removeLoadingMessage, roomId, scrollToMessageListBottom]);
+
+  // Handle AI errors
+  useEffect(() => {
+    if (aiError) {
+      removeLoadingMessage();
+      dispatch(addMessage({
+        roomId,
+        message: {
+          roomId,
+          id: `error-${(Math.random() * 1e6)}`,
+          content: `${aiError}`,
+          address: contextAccounts[0],
+          timestamp: new Date().toISOString(),
+          isError: true,
+          isAssistant: true
+        }
+      }));
+    }
+  }, [aiError, dispatch, removeLoadingMessage, roomId, contextAccounts]);
 
   const sendErrorMessage = () => {
     removeLoadingMessage();
@@ -97,7 +140,7 @@ export function Chat() {
     }}));
   }
 
-  const handleSendMessage = useCallback((content: string) => {
+  const handleSendMessage = useCallback(async (content: string) => {
     if (!content.trim() || !roomId) return;
 
     // Add optimistic user message
@@ -115,10 +158,31 @@ export function Chat() {
     dispatchAddMessage(userMessage);
 
     try {
-      // Here would go the code to send to the AI with context
-      // If we had an AI API integration, we would use:
-      // const agentContext = typeof window !== 'undefined' ? localStorage.getItem("agentContext") || "" : "";
-      // sendToAI(content, agentContext);
+      // Get chat history for context
+      const conversationHistory: AIMessage[] = messages.map(msg => ({
+        role: msg.isAssistant ? 'assistant' : 'user',
+        content: msg.content,
+      }));
+
+      // Add the new user message
+      conversationHistory.push({
+        role: 'user',
+        content,
+      });
+
+      // Get agent context if available
+      const agentContext = typeof window !== 'undefined' ? localStorage.getItem("agentContext") || "" : "";
+      
+      // Add system context if available
+      if (agentContext) {
+        conversationHistory.unshift({
+          role: 'system',
+          content: agentContext,
+        });
+      }
+
+      // Send to AI
+      await sendToAI(conversationHistory);
 
       chatInputRef.current?.clear();
     } catch (error) {
@@ -127,7 +191,7 @@ export function Chat() {
     } finally {
       scrollToMessageListBottom();
     }
-  }, [dispatchAddMessage, scrollToMessageListBottom, accounts]);
+  }, [dispatchAddMessage, scrollToMessageListBottom, accounts, messages, sendToAI, contextAccounts]);
 
   const navigateToSettings = () => {
     router.push('/settings');
@@ -258,7 +322,7 @@ useEffect(() => {
           ref={chatInputRef}
           onSend={handleSendMessage}
           placeholder="Type a message..."
-          isDisabled={isLoadingMessages}
+          isDisabled={isLoadingMessages || isAILoading}
           height='sm'
         />
       </div>
