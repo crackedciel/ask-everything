@@ -89,6 +89,8 @@ export function Chat() {
   useEffect(() => {
     if (response?.content) {
       removeLoadingMessage();
+
+      console.log('sending ai message with profile', profileData)
       
       const aiMessage: Message = {
         id: `ai-${(Math.random() * 1e6)}`,

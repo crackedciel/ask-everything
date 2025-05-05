@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import '@/styles/globals.scss';
+import { UpProvider } from '@/components/upProvider';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'LUKSO MiniApp Nextjs Template',
@@ -13,7 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+          
+      <body><Providers>
+      <UpProvider>{children}</UpProvider>
+      </Providers></body>
+      
     </html>
   );
 }

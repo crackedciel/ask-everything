@@ -1,9 +1,7 @@
 "use client";
 
-import { UpProvider } from "@/components/upProvider";
 import { Chat } from "@/components/Chat";
 import { useState, useEffect } from "react";
-import { Providers } from "./providers";
 
 // Import the LUKSO web-components library
 let promise: Promise<unknown> | null = null;
@@ -48,12 +46,6 @@ function MainContent() {
  */
 export default function Home() {
   return (
-      <Providers>
-    <UpProvider>
     <MainContent />
-
-    </UpProvider>
-
-      </Providers>
   );
 }

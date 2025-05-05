@@ -1,21 +1,56 @@
-import { Blockchain } from "@/types/enum";
+import { createPublicClient, http, encodeFunctionData, Hex, keccak256, toHex } from "viem";
+import { lukso, luksoTestnet } from "viem/chains";
 
-const networkIdToBlockchain: { [key: number]: Blockchain } = {
-  // EVM chains
-  1: Blockchain.ETHEREUM,
-  10: Blockchain.OPTIMISM,
-  56: Blockchain.BSC,
-  137: Blockchain.POLYGON,
-  146: Blockchain.SONIC,
-  8453: Blockchain.BASE,
-  42161: Blockchain.ARBITRUM,
-  43114: Blockchain.AVALANCHE,
-  81457: Blockchain.BLAST,
-  2741: Blockchain.ABSTRACT,
-  // Other chains
-  1399811149: Blockchain.SOLANA,
+// ERC725Y interface ABI for the setData function
+export const ERC725Y_ABI = [
+  {
+    inputs: [
+      { name: "dataKey", type: "bytes32" },
+      { name: "dataValue", type: "bytes" }
+    ],
+    name: "setData",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { name: "dataKey", type: "bytes32" }
+    ],
+    name: "getData",
+    outputs: [
+      { name: "dataValue", type: "bytes" }
+    ],
+    stateMutability: "view",
+    type: "function",
+  }
+] as const;
+
+// Create a client for read-only operations
+export const getPublicClient = (chainId: number) => {
+  return createPublicClient({
+    chain: chainId === 42 ? lukso : luksoTestnet,
+    transport: http(),
+  });
 };
 
-export const getBlockchainFromNetworkId = (networkId: number): Blockchain | undefined => {
-  return networkIdToBlockchain[networkId];
+// Calculate keccak256 hash for a string key
+export const getDataKey = (key: string): Hex => {
+  // Use viem's keccak256 function to properly hash the key to a bytes32 value
+  return keccak256(toHex(key));
+};
+
+// Helper to encode data for ERC725Y setData transaction
+export const encodeERC725YSetData = (key: string, value: string): Hex => {
+  // Hash the key to create a proper bytes32 value
+  const dataKey = getDataKey(key);
+  
+  // Convert the string to bytes
+  const valueBytes = `0x${Buffer.from(value).toString("hex")}` as Hex;
+  
+  return encodeFunctionData({
+    abi: ERC725Y_ABI,
+    functionName: "setData",
+    args: [dataKey, valueBytes],
+  });
 };
