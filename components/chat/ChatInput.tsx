@@ -29,11 +29,11 @@ const ChatInput = React.forwardRef(({
   const getHeightClass = () => {
     switch (height) {
       case 'sm':
-        return 'min-h-[100px]';
+        return 'min-h-[70px]';
       case 'lg':
-        return 'min-h-[140px]';
+        return 'min-h-[100px]';
       default: // 'md'
-        return 'min-h-[120px]';
+        return 'min-h-[85px]';
     }
   };
 
@@ -145,7 +145,7 @@ const ChatInput = React.forwardRef(({
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full">
-      <div className={`relative rounded-xl backdrop-blur-md bg-gray-800/30 border border-gray-700/40 w-full transition-colors ${isFocused ? 'border-gray-400/30' : ''}`}>
+      <div className={`relative rounded-lg backdrop-blur-md bg-gray-800/30 border border-gray-700/40 w-full transition-colors ${isFocused ? 'border-gray-400/30' : ''}`}>
         <div className="relative">
           <textarea
             ref={textareaRef}
@@ -153,33 +153,33 @@ const ChatInput = React.forwardRef(({
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            rows={4}
-            className={`w-full bg-transparent px-4 py-4 text-sm text-gray-200 placeholder-gray-400 outline-none resize-none ${heightClass} absolute inset-0 caret-gray-200`}
+            rows={3}
+            className={`w-full bg-transparent px-2 py-2 text-xs text-gray-200 placeholder-gray-400 outline-none resize-none ${heightClass} absolute inset-0 caret-gray-200`}
             maxLength={maxLength}
             disabled={isLoading}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
           />
-          <div className={`w-full bg-transparent px-4 py-4 text-sm text-gray-200 ${heightClass} whitespace-pre-wrap pointer-events-none`}>
+          <div className={`w-full bg-transparent px-2 py-2 text-xs text-gray-200 ${heightClass} whitespace-pre-wrap pointer-events-none`}>
             {message || suggestion ? renderStyledMessage() : (
               <span className="text-gray-400">{placeholder}</span>
             )}
           </div>
         </div>
 
-        <div className="absolute bottom-3 right-3 flex items-center gap-3">
-          <span className="text-xs text-gray-400">
+        <div className="absolute bottom-1.5 right-1.5 flex items-center gap-2">
+          <span className="text-[10px] text-gray-400">
             {message.length}/{maxLength}
           </span>
           <button
             type="submit"
             disabled={!message.trim() || message.length > maxLength || isLoading || isDisabled}
-            className="p-2 rounded-md bg-gray-500/20 text-gray-200 hover:bg-gray-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="p-1.5 rounded-md bg-gray-500/20 text-gray-200 hover:bg-gray-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? (
-              <Loader2 size={18} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" />
             ) : (
-              <ArrowRight size={18} />
+              <ArrowRight size={14} />
             )}
           </button>
         </div>

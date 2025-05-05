@@ -34,7 +34,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     />
   )) : (
     <div className="flex justify-center items-center h-full">
-      <div className="text-center text-gray-600">No messages yet</div>
+      <div className="text-center text-xs text-gray-600">No messages yet</div>
     </div>
   );
 };

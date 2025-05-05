@@ -101,12 +101,13 @@ export function Chat() {
           <MessageList messages={messages} profileAddress={contextAccounts[0]} />
         </div>
       )}
-      <div className="sticky bottom-0 left-0 right-0 border-t border-zinc-800 bg-black p-4">
+      <div className="sticky bottom-0 left-0 right-0 border-t border-zinc-800 bg-black p-1">
         <ChatInput
           ref={chatInputRef}
           onSend={handleSendMessage}
           placeholder="Type a message..."
           isDisabled={isLoadingMessages}
+          height='sm'
         />
       </div>
     </div>

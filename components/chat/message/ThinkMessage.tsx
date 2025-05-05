@@ -86,20 +86,20 @@ const ThinkMessage = ({ content }: { content: string }) => {
   const parts = parseContent(content);
   
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       {parts.map((part, index) => {
         if (part.type === 'think') {
           return (
             <div 
               key={index}
-              className="flex items-start gap-2 text-sm text-blue-400 pb-5"
+              className="flex items-start gap-1 text-xs text-blue-400 pb-2"
             >
-              <CloudIcon className="w-4 h-4 mt-1 flex-shrink-0" />
+              <CloudIcon className="w-3 h-3 mt-0.5 flex-shrink-0" />
               <div>{formattedContent(part.content)}</div>
             </div>
           );
         }
-        return <div key={index}>{formattedContent(part.content)}</div>;
+        return <div key={index} className="text-xs">{formattedContent(part.content)}</div>;
       })}
     </div>
   );

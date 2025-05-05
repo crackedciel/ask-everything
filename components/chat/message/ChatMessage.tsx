@@ -76,27 +76,27 @@ const ChatMessage = ({
     
     return (
       <div className={cn(
-        `max-w-3xl gap-2 backdrop-blur-md ${isPlaceholder ? "py-1 px-3" : "py-2 px-4"}`,
+        `max-w-3xl gap-1 backdrop-blur-md ${isPlaceholder ? "py-0.5 px-2" : "py-1 px-2"}`,
         backgroundColor,
         border,
         color,
-        fontSize,
+        isPlaceholder ? "text-xs" : "text-xs",
         isPartOfGroup ? (
           isLastInGroup && !(message.images && message.images.length) ?
-            `rounded-xl rounded-tl-lg` :
-            `rounded-xl ${isAssistant ? "rounded-bl-lg" : "rounded-br-lg"}`
-        ) : `rounded-xl`,
+            `rounded-lg rounded-tl-md` :
+            `rounded-lg ${isAssistant ? "rounded-bl-md" : "rounded-br-md"}`
+        ) : `rounded-lg`,
         className,
       )}>
         {isPlaceholder && (
           <div className={`w-2 h-2 rounded-full ${isPlaceholderInProgress ? "animate-pulse bg-yellow-500" : "bg-green-700"}`} />
         )}
         {message.isLoading ? (
-          <div className="p-2 rounded-2xl">
-            <div className="flex space-x-2">
-              <div className="w-2 h-2 bg-white/30 rounded-full animate-[bounce_1s_ease-in-out_infinite]" />
-              <div className="w-2 h-2 bg-white/30 rounded-full animate-[bounce_1s_ease-in-out_0.2s_infinite]" />
-              <div className="w-2 h-2 bg-white/30 rounded-full animate-[bounce_1s_ease-in-out_0.4s_infinite]" />
+          <div className="p-1 rounded-lg">
+            <div className="flex space-x-1">
+              <div className="w-1.5 h-1.5 bg-white/30 rounded-full animate-[bounce_1s_ease-in-out_infinite]" />
+              <div className="w-1.5 h-1.5 bg-white/30 rounded-full animate-[bounce_1s_ease-in-out_0.2s_infinite]" />
+              <div className="w-1.5 h-1.5 bg-white/30 rounded-full animate-[bounce_1s_ease-in-out_0.4s_infinite]" />
             </div>
           </div>
         ) : messageContent}
@@ -114,15 +114,15 @@ const ChatMessage = ({
     <>
       <div className={cn(
         "w-full",
-        isFirstInGroup ? "mt-4" : "mt-1"
+        isFirstInGroup ? "mt-2" : "mt-0.5"
       )}>
         {isFirstInGroup && (
           <div className={cn(
-            "flex w-full mb-1",
+            "flex w-full mb-0.5",
             alignment
           )}>
             <div className={cn(
-              "text-xs",
+              "text-[10px]",
               isAssistant ? "text-purple-400" : "text-gray-400",
             )}>
               {formatUsername(message.username || message.address)}
@@ -130,7 +130,7 @@ const ChatMessage = ({
           </div>
         )}
         <div className={cn(
-          "flex w-full items-start gap-2",
+          "flex w-full items-start gap-1",
           alignment
         )}>
           {isAssistant && (
