@@ -96,23 +96,23 @@ export function SettingsContent() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full max-w-5xl mx-auto p-4">
-      <div className="flex items-center mb-6">
+    <div className="flex flex-col h-[100dvh] w-full max-w-5xl mx-auto">
+      <div className="flex items-center p-4 mb-2 bg-gray-900/60 backdrop-blur-md border-b border-gray-800/60">
         <button
           onClick={() => router.back()}
-          className="p-2 mr-2 rounded-full hover:bg-zinc-800"
+          className="p-2 mr-3 rounded-full hover:bg-zinc-800/40 transition-colors"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={22} className="text-gray-300" />
         </button>
-        <h1 className="text-xl font-semibold">Agent Settings</h1>
+        <h1 className="text-xl font-semibold text-gray-200">Agent Settings</h1>
       </div>
 
-      <div className="flex-1">
+      <div className="flex-1 p-4 bg-gray-900/20 backdrop-blur-sm">
         <label className="block mb-2 text-sm font-medium text-gray-300">
           Agent Context
         </label>
         {isLoading ? (
-          <div className="w-full h-64 flex items-center justify-center bg-zinc-900 border border-zinc-700 rounded-md">
+          <div className="w-full h-64 flex items-center justify-center bg-gray-800/30 backdrop-blur-md border border-gray-700/40 rounded-lg">
             <span className="animate-spin h-6 w-6 border-t-2 border-b-2 border-white rounded-full mr-2"></span>
             <span>Loading context...</span>
           </div>
@@ -120,7 +120,7 @@ export function SettingsContent() {
           <textarea
             value={agentContext}
             onChange={(e) => setAgentContext(e.target.value)}
-            className="w-full h-64 p-3 bg-zinc-900 border border-zinc-700 rounded-md text-white resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full h-64 p-3 bg-gray-800/30 backdrop-blur-md border border-gray-700/40 rounded-lg text-white resize-none focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600"
             placeholder="Enter context information for the agent..."
           />
         )}
@@ -129,7 +129,7 @@ export function SettingsContent() {
         </p>
       </div>
 
-      <div className="mt-4">
+      <div className="p-4 bg-gray-900/80 backdrop-blur-xl border-t border-zinc-800">
         <Button 
           onClick={handleSave} 
           className="w-full flex items-center justify-center"

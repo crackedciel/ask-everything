@@ -67,7 +67,7 @@ const ChatInput = React.forwardRef(({
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full">
-      <div className={`relative rounded-lg backdrop-blur-md bg-gray-800/30 border border-gray-700/40 w-full transition-colors ${isFocused ? 'border-gray-400/30' : ''}`}>
+      <div className={`relative rounded-lg backdrop-blur-md bg-gray-800/30 border border-gray-700/40 w-full transition-colors ${isFocused ? 'border-gray-400/40' : ''}`}>
         <div className="relative">
           <textarea
             ref={textareaRef}

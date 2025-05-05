@@ -27,8 +27,16 @@ const ChatMessage = ({
   const isPlaceholderInProgress = message.placeholderStatus === 'in_progress';
   const isPlaceholderFinished = message.placeholderStatus === 'finished';
   const alignment = isAssistant ? "justify-start" : "justify-end";
-  const backgroundColor = isAssistant ? message.isError ? "bg-red-900/40" : "bg-gray-700/30" : "bg-gray-500/30";
-  const border = isPlaceholderInProgress ? "border border-yellow-500/40" : isPlaceholderFinished ? "border border-green-700/50" : "";
+  const backgroundColor = isAssistant 
+    ? message.isError 
+      ? "bg-red-900/40" 
+      : "bg-gray-800/30 backdrop-blur-md border border-gray-700/40" 
+    : "bg-gray-800/30 backdrop-blur-md border border-gray-700/40";
+  const border = isPlaceholderInProgress 
+    ? "border border-yellow-500/40" 
+    : isPlaceholderFinished 
+      ? "border border-green-700/50" 
+      : "";
   const color = isPlaceholder ? "text-white/40" : "text-white";
 
   const formatUsername = (userId: string | undefined) => {
@@ -38,7 +46,7 @@ const ChatMessage = ({
   }
 
   const renderToolOutput = () => {
-    if (message.isError) return renderMessage(message.toolOutput as string, "bg-red-900/40");
+    if (message.isError) return renderMessage(message.toolOutput as string, "bg-red-900/40 border border-red-800/50");
     if (!message.toolOutput) return;
   };
 
@@ -61,7 +69,7 @@ const ChatMessage = ({
     
     return (
       <div className={cn(
-        `max-w-3xl gap-1 backdrop-blur-md ${isPlaceholder ? "py-0.5 px-2" : "py-1 px-2"}`,
+        `max-w-3xl gap-1 backdrop-blur-md transition-colors ${isPlaceholder ? "py-0.5 px-2" : "py-1.5 px-3"}`,
         backgroundColor,
         border,
         color,

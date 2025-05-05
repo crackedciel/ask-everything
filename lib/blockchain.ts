@@ -1,6 +1,6 @@
 import { createPublicClient, http, encodeFunctionData, Hex, keccak256, toHex } from "viem";
 import { lukso } from "viem/chains";
-import { ethers, hexlify, toUtf8Bytes } from "ethers";
+import {  hexlify, toUtf8Bytes } from "ethers";
 
 // ERC725Y interface ABI for the setData function
 export const ERC725Y_ABI = [
@@ -28,6 +28,7 @@ export const ERC725Y_ABI = [
 ] as const;
 
 // Create a client for read-only operations
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getPublicClient = (chainId: number) => {
   return createPublicClient({
     chain: lukso,

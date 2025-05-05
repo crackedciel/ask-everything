@@ -27,9 +27,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 disabled:pointer-events-none disabled:opacity-50';
 
     const variants = {
-      default: 'bg-gray-500/20 text-gray-200 hover:bg-gray-500/40 ',
-      secondary: 'bg-gray-700/20 text-gray-200 hover:bg-gray-700/40 ',
-      ghost: '',
+      default: 'bg-gray-800/80 text-gray-200 hover:bg-gray-700/80 border border-gray-700/40',
+      secondary: 'bg-gray-700/40 text-gray-200 hover:bg-gray-600/60 border border-gray-700/40',
+      ghost: 'text-gray-300 hover:bg-gray-800/40',
     };
 
     const sizes = {

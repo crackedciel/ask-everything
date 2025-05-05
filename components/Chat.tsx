@@ -52,6 +52,7 @@ export function Chat() {
           isLoading: false,
       });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const firstMessage = useAppSelector(state => state.chat.firstMessage);
   const messages: Message[] = useAppSelector(state => state.room.messages[roomId] || []);
 
@@ -66,7 +67,7 @@ export function Chat() {
   const { sendMessage: sendToAI, isLoading: isAILoading, response, error: aiError } = useApi();
   
   // Get agent context from blockchain
-  const { agentContext, isLoading: isContextLoading } = useAgentContext(contextAccounts?.[0], chainId || 0);
+  const { agentContext } = useAgentContext(contextAccounts?.[0], chainId || 0);
 
   const scrollToMessageListBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     setTimeout(() => {
@@ -300,10 +301,10 @@ useEffect(() => {
         <div className="absolute top-4 right-4 z-10">
           <button 
             onClick={navigateToSettings}
-            className="p-2 rounded-full bg-zinc-800/70 hover:bg-zinc-700 transition-colors"
+            className="p-2 rounded-full hover:bg-zinc-800/40 transition-colors"
             aria-label="Settings"
           >
-            <Settings size={20} />
+            <Settings size={20} className="text-gray-300" />
           </button>
         </div>
       )}
@@ -315,7 +316,7 @@ useEffect(() => {
       ) : (
         <div 
           ref={messageListContainerRef} 
-          className="flex-1 overflow-y-auto p-4 pb-safe"
+          className="flex-1 overflow-y-auto p-4 pb-safe bg-gray-900/20 backdrop-blur-sm"
           style={{ 
             height: 'calc(100dvh - 80px)',
             overscrollBehavior: 'none'
@@ -324,7 +325,7 @@ useEffect(() => {
           <MessageList messages={messages} profileAddress={contextAccounts[0]} />
         </div>
       )}
-      <div className="sticky bottom-0 left-0 right-0 border-t border-zinc-800 bg-black p-1">
+      <div className="sticky bottom-0 left-0 right-0 border-t border-zinc-800 bg-gray-900/80 backdrop-blur-xl p-2 pt-1.5">
         <ChatInput
           ref={chatInputRef}
           onSend={handleSendMessage}
