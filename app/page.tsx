@@ -1,10 +1,9 @@
 "use client";
 
 import { UpProvider } from "@/components/upProvider";
-import { Donate } from "@/components/Donate";
-import { ProfileSearch } from "@/components/ProfileSearch";
-import { useUpProvider } from "@/components/upProvider";
+import { Chat } from "@/components/Chat";
 import { useState, useEffect } from "react";
+import { Providers } from "./providers";
 
 // Import the LUKSO web-components library
 let promise: Promise<unknown> | null = null;
@@ -30,22 +29,13 @@ function MainContent() {
     });
   }, []);
 
-  const { selectedAddress, setSelectedAddress, isSearching } = useUpProvider();
-
   if (!mounted) {
     return null; // or a loading placeholder
   }
 
   return (
-    <>
-      <div className={`${isSearching ? "hidden" : "block"}`}>
-        <Donate selectedAddress={selectedAddress} />
-      </div>
-
-      <div className={`${!isSearching ? "hidden" : "block"}`}>
-        <ProfileSearch onSelectAddress={setSelectedAddress} />
-      </div>
-    </>
+    
+        <Chat />
   );
 }
 
@@ -58,8 +48,12 @@ function MainContent() {
  */
 export default function Home() {
   return (
+      <Providers>
     <UpProvider>
-      <MainContent />
+    <MainContent />
+
     </UpProvider>
+
+      </Providers>
   );
 }
