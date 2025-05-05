@@ -1,5 +1,6 @@
 import { createPublicClient, http, encodeFunctionData, Hex, keccak256, toHex } from "viem";
-import { lukso, luksoTestnet } from "viem/chains";
+import { lukso } from "viem/chains";
+import { ethers, hexlify, toUtf8Bytes } from "ethers";
 
 // ERC725Y interface ABI for the setData function
 export const ERC725Y_ABI = [
@@ -29,7 +30,7 @@ export const ERC725Y_ABI = [
 // Create a client for read-only operations
 export const getPublicClient = (chainId: number) => {
   return createPublicClient({
-    chain: chainId === 42 ? lukso : luksoTestnet,
+    chain: lukso,
     transport: http(),
   });
 };
@@ -46,11 +47,13 @@ export const encodeERC725YSetData = (key: string, value: string): Hex => {
   const dataKey = getDataKey(key);
   
   // Convert the string to bytes
-  const valueBytes = `0x${Buffer.from(value).toString("hex")}` as Hex;
+  const valueBytes =  toUtf8Bytes(value);
+  const hexString = hexlify(valueBytes);
+
   
   return encodeFunctionData({
     abi: ERC725Y_ABI,
     functionName: "setData",
-    args: [dataKey, valueBytes],
+    args: [dataKey, hexString as `0x${string}`],
   });
 };

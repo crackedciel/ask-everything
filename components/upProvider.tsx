@@ -21,7 +21,7 @@ import {
   type UPClientProvider,
 } from "@lukso/up-provider";
 import { createWalletClient, custom } from "viem";
-import { lukso, luksoTestnet } from "viem/chains";
+import { lukso } from "viem/chains";
 import {
   createContext,
   useContext,
@@ -78,7 +78,7 @@ export function UpProvider({ children }: UpProviderProps) {
   const client = useMemo(() => {
     if (provider && chainId) {
       return createWalletClient({
-        chain: chainId === 42 ? lukso : luksoTestnet,
+        chain: lukso,
         transport: custom(provider),
       });
     }

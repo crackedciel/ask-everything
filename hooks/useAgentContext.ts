@@ -22,7 +22,7 @@ export function useAgentContext(account: `0x${string}` | undefined, chainId: num
         }
 
         const publicClient = createPublicClient({
-          chain: chainId === 42 ? lukso : luksoTestnet,
+          chain: lukso,
           transport: http(),
         });
 

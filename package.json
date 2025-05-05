@@ -19,6 +19,7 @@
     "ai": "^4.3.13",
     "class-variance-authority": "^0.7.1",
     "ethereum-blockies-base64": "^1.0.2",
+    "ethers": "^6.13.7",
     "graphql": "^16.10.0",
     "graphql-request": "^7.1.2",
     "lucide-react": "^0.507.0",

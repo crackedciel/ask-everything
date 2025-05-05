@@ -7,7 +7,8 @@ import Button from "@/components/ui/Button";
 import { useUpProvider } from "@/components/upProvider";
 import { encodeERC725YSetData, ERC725Y_ABI, getDataKey } from "@/lib/blockchain";
 import { createPublicClient, http } from "viem";
-import { lukso, luksoTestnet } from "viem/chains";
+import { lukso } from "viem/chains";
+import {toUtf8String} from "ethers";
 
 export function SettingsContent() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export function SettingsContent() {
         // Only load from blockchain if account is available
         if (accounts?.[0]) {
           const publicClient = createPublicClient({
-            chain: chainId === 42 ? lukso : luksoTestnet,
+            chain: lukso,
             transport: http(),
           });
           
@@ -39,7 +40,8 @@ export function SettingsContent() {
             
             if (dataKey) {
               // Convert bytes to string
-              const dataString = dataKey ? new TextDecoder().decode(dataKey as Uint8Array) : '';
+              console.log("Data key found:", dataKey);
+              const dataString = toUtf8String(dataKey);
               if (dataString && dataString.trim()) {
                 console.log("Loaded context from blockchain:", dataString);
                 setAgentContext(dataString);
