@@ -32,6 +32,7 @@ export class AiService {
   async generateResponse(messages: Message[]) {
     const requestId = this.generateRequestId();
     console.log(`AI Request [${requestId}] - Processing ${messages.length} messages`);
+    console.log(`AI Request [${requestId}] - Messages:`, messages);
 
     try {
       const config: GenerationConfig = {

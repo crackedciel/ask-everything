@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { createPublicClient, http } from "viem";
-import { lukso, luksoTestnet } from "viem/chains";
+import { lukso } from "viem/chains";
 import { ERC725Y_ABI, getDataKey } from "@/lib/blockchain";
+import { toUtf8String } from "ethers";
 
 export function useAgentContext(account: `0x${string}` | undefined, chainId: number) {
   const [agentContext, setAgentContext] = useState<string>("");
@@ -39,8 +40,10 @@ export function useAgentContext(account: `0x${string}` | undefined, chainId: num
             
             if (dataKey) {
               // Convert bytes to string
-              const dataString = new TextDecoder().decode(dataKey as Uint8Array);
+              const dataString = toUtf8String(dataKey);
               console.log("Agent context loaded:", dataString ? "has content" : "empty");
+              // Check if the dataString is not empty or whitespace
+              console.log(dataString);
               setAgentContext(dataString.trim());
             } else {
               console.log("No agent context data exists yet");
