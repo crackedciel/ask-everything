@@ -13,7 +13,6 @@ interface MessageProps {
   isLastInGroup?: boolean;
   isPartOfGroup?: boolean;
   isLoading?: boolean;
-  profileAddress: string;
 }
 
 const ChatMessage = ({
@@ -21,10 +20,9 @@ const ChatMessage = ({
   isFirstInGroup = false,
   isLastInGroup = false,
   isPartOfGroup = false,
-  profileAddress,
 }: MessageProps) => {
 
-  const isAssistant = message.address === profileAddress;
+  const isAssistant = message.isAssistant;
   const isPlaceholder = message.placeholderStatus;
   const isPlaceholderInProgress = message.placeholderStatus === 'in_progress';
   const isPlaceholderFinished = message.placeholderStatus === 'finished';
@@ -32,10 +30,9 @@ const ChatMessage = ({
   const backgroundColor = isAssistant ? message.isError ? "bg-red-900/40" : "bg-gray-700/30" : "bg-gray-500/30";
   const border = isPlaceholderInProgress ? "border border-yellow-500/40" : isPlaceholderFinished ? "border border-green-700/50" : "";
   const color = isPlaceholder ? "text-white/40" : "text-white";
-  const fontSize = isPlaceholder ? "text-sm" : "text-md";
 
   const formatUsername = (userId: string | undefined) => {
-    if (userId === 'assistant') return 'Agoria';
+    if (userId === 'assistant') return 'Profile';
     if (!userId) return 'User';
     return userId.split(':').slice(-1)[0].slice(4, 8);
   }
@@ -43,18 +40,6 @@ const ChatMessage = ({
   const renderToolOutput = () => {
     if (message.isError) return renderMessage(message.toolOutput as string, "bg-red-900/40");
     if (!message.toolOutput) return;
-  };
-
-  const renderFormattedText = (content: string) => {
-    // Split content by @agoria, preserving the mention
-    const parts = content.split(/(@agoria)/g);
-    
-    return parts.map((part, index) => {
-      if (part === '@agoria') {
-        return <span key={index} className="text-purple-400">{part}</span>;
-      }
-      return <span key={index}>{part}</span>;
-    });
   };
 
   const renderMessage = (content: string, className?: string) => {
@@ -67,7 +52,7 @@ const ChatMessage = ({
       typeof trimmedContent === 'string' ? (
         trimmedContent.split('\n').map((line, index, array) => (
           <React.Fragment key={index}>
-            {renderFormattedText(line.trim())}
+            {line.trim()}
             {index < array.length - 1 && <br />}
           </React.Fragment>
         ))

@@ -14,7 +14,6 @@ interface MessageGroupProps {
 export const MessageGroup: React.FC<MessageGroupProps> = ({
   messages,
   className,
-  profileAddress
 }) => {
   return (
     <div className={cn("flex flex-col", className)}>
@@ -27,7 +26,6 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({
             isFirstInGroup={index === 0}
             isLastInGroup={index === messages.length - 1}
             isPartOfGroup={messages.length > 1}
-            profileAddress={profileAddress}
           />
         );
       })}

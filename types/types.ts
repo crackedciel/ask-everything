@@ -7,6 +7,7 @@ export interface Message {
   id: string;
   content: string;
   address: string;
+  isAssistant: boolean;
   username?: string;
   profileImage?: string;
   roomId: string;

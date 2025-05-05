@@ -21,7 +21,6 @@ const ChatInput = React.forwardRef(({
   height = 'md',
 }: ChatInputProps, ref: React.ForwardedRef<{ clear: () => void }>) => {
   const [message, setMessage] = useState(initialMessage);
-  const [suggestion, setSuggestion] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -52,93 +51,16 @@ const ChatInput = React.forwardRef(({
     }
   };
 
-  const insertMention = () => {
-    if (!textareaRef.current || !suggestion) return;
-    
-    const textarea = textareaRef.current;
-    const cursorPos = textarea.selectionStart;
-    const beforeCursor = message.slice(0, cursorPos);
-    const afterCursor = message.slice(cursorPos);
-    const lastAtPos = beforeCursor.lastIndexOf('@');
-    
-    if (lastAtPos === -1) return;
-    
-    const newMessage = beforeCursor.slice(0, lastAtPos) + '@agoria ' + afterCursor;
-    setMessage(newMessage);
-    setSuggestion('');
-    
-    // Set cursor position after the inserted mention
-    const newCursorPos = lastAtPos + '@agoria '.length;
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.selectionStart = newCursorPos;
-        textareaRef.current.selectionEnd = newCursorPos;
-        textareaRef.current.focus();
-      }
-    }, 0);
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
-    } else if (e.key === 'Tab' && suggestion) {
-      e.preventDefault();
-      insertMention();
     }
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     setMessage(newValue);
-    
-    const cursorPos = e.target.selectionStart;
-    const textBeforeCursor = newValue.slice(0, cursorPos);
-    const lastAtPos = textBeforeCursor.lastIndexOf('@');
-    
-    if (lastAtPos !== -1) {
-      const typedMention = textBeforeCursor.slice(lastAtPos);
-      if (typedMention.startsWith('@') && '@agoria'.startsWith(typedMention.toLowerCase())) {
-        setSuggestion('@agoria'.slice(typedMention.length));
-      } else {
-        setSuggestion('');
-      }
-    } else {
-      setSuggestion('');
-    }
-  };
-
-  // Style the message with purple @mentions
-  const renderStyledMessage = () => {
-    if (!message) return null;
-
-    const parts = message.split(/(@agoria)/g);
-    const styledParts = parts.map((part, index) => 
-      part === '@agoria' ? (
-        <span key={index} className="text-purple-400">{part}</span>
-      ) : part
-    );
-
-    // Add suggestion if exists
-    if (suggestion && textareaRef.current) {
-      const cursorPos = textareaRef.current.selectionStart;
-      const textBeforeCursor = message.slice(0, cursorPos);
-      const lastAtPos = textBeforeCursor.lastIndexOf('@');
-      
-      if (lastAtPos !== -1) {
-        const typedMention = textBeforeCursor.slice(lastAtPos);
-        if ('@agoria'.startsWith(typedMention.toLowerCase())) {
-          return (
-            <>
-              {styledParts}
-              <span className="text-purple-300/70">{suggestion}</span>
-            </>
-          );
-        }
-      }
-    }
-
-    return styledParts;
   };
 
   const heightClass = getHeightClass();
@@ -161,7 +83,7 @@ const ChatInput = React.forwardRef(({
             onBlur={() => setIsFocused(false)}
           />
           <div className={`w-full bg-transparent px-2 py-2 text-xs text-gray-200 ${heightClass} whitespace-pre-wrap pointer-events-none`}>
-            {message || suggestion ? renderStyledMessage() : (
+            {message ? message : (
               <span className="text-gray-400">{placeholder}</span>
             )}
           </div>
