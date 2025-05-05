@@ -58,6 +58,7 @@ export function Chat() {
       address: contextAccounts[0],
       timestamp: new Date().toISOString(),
       isError: true,
+      isAssistant: true
     }}));
   }
 
@@ -71,6 +72,7 @@ export function Chat() {
       content,
       address: accounts[0],
       timestamp: new Date().toISOString(),
+      isAssistant: false,
     };
 
     dispatchAddMessage(userMessage);
