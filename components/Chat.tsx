@@ -30,8 +30,8 @@ export function Chat() {
           profileAddress: string;
           isLoading: boolean;
       }>({
-          imgUrl: 'https://tools-web-components.pages.dev/images/sample-avatar.jpg',
-          fullName: 'username',
+          imgUrl: '',
+          fullName: 'assistant',
           background: 'https://tools-web-components.pages.dev/images/sample-background.jpg',
           profileAddress: '0x1234567890111213141516171819202122232425',
           isLoading: false,
@@ -97,6 +97,8 @@ export function Chat() {
         address: 'Agoria', // AI identifier 
         timestamp: new Date().toISOString(),
         isAssistant: true,
+        username: profileData.fullName,
+        profileImage: profileData.imgUrl
       };
       
       dispatchAddMessage(aiMessage);
@@ -199,14 +201,14 @@ export function Chat() {
 
   useEffect(() => {
     async function fetchProfileImage() {
-        if (!accounts || accounts.length) return;
+        if (!contextAccounts || !contextAccounts.length) return;
 
         setProfileData(prev => ({ ...prev, isLoading: true }));
 
         try {
             const config = { ipfsGateway: IPFS_GATEWAY };
             const rpcEndpoint = RPC_ENDPOINT_MAINNET;
-            const profile = new ERC725(erc725schema, accounts[0], rpcEndpoint, config);
+            const profile = new ERC725(erc725schema, contextAccounts[0], rpcEndpoint, config);
             const fetchedData = await profile.fetchData('LSP3Profile');
 
             if (
@@ -218,6 +220,8 @@ export function Chat() {
                 const fullName = fetchedData.value.LSP3Profile.name;
                 const profileBackground = fetchedData.value.LSP3Profile.backgroundImage;
 
+                console.log(`Fetched ${fullName}`);
+
                 setProfileData({
                     fullName: fullName || '',
                     imgUrl: profileImagesIPFS?.[0]?.url
@@ -226,7 +230,7 @@ export function Chat() {
                     background: profileBackground?.[0]?.url
                         ? profileBackground[0].url.replace('ipfs://', IPFS_GATEWAY)
                         : '',
-                    profileAddress: accounts[0],
+                    profileAddress: contextAccounts[0],
                     isLoading: false,
                 });
             }
@@ -240,18 +244,18 @@ export function Chat() {
     }
 
     fetchProfileImage();
-}, [accounts]);
+}, [contextAccounts]);
 
 useEffect(() => {
   async function fetchUserImage() {
-      if (!contextAccounts || contextAccounts.length) return;
+      if (!accounts || !accounts.length) return;
 
       setUserData(prev => ({ ...prev, isLoading: true }));
 
       try {
           const config = { ipfsGateway: IPFS_GATEWAY };
           const rpcEndpoint = RPC_ENDPOINT_MAINNET;
-          const profile = new ERC725(erc725schema, contextAccounts[0], rpcEndpoint, config);
+          const profile = new ERC725(erc725schema, accounts[0], rpcEndpoint, config);
           const fetchedData = await profile.fetchData('LSP3Profile');
 
           if (
@@ -271,7 +275,7 @@ useEffect(() => {
                   background: profileBackground?.[0]?.url
                       ? profileBackground[0].url.replace('ipfs://', IPFS_GATEWAY)
                       : '',
-                  profileAddress: contextAccounts[0],
+                  profileAddress: accounts[0],
                   isLoading: false,
               });
           }
@@ -285,7 +289,7 @@ useEffect(() => {
   }
 
   fetchUserImage();
-}, [contextAccounts]);
+}, [accounts]);
 
   return (
     <div key={'default'} className="flex flex-col h-[100dvh] w-full max-w-5xl mx-auto">

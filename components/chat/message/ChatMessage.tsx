@@ -120,7 +120,7 @@ const ChatMessage = ({
         )}>
           {isAssistant && (
             <ProfileAvatar 
-              src={isAssistant ? "/images/assistant-200x200.png" : undefined}
+              src={message.profileImage || undefined}
               size="sm"
               className={isFirstInGroup ? '' : 'opacity-0'}
             />

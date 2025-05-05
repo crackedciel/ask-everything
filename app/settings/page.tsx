@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { useUpProvider } from "@/components/upProvider";
 
 export default function SettingsPage() {
   const router = useRouter();
   const [agentContext, setAgentContext] = useState("");
+    const { accounts } =
+      useUpProvider();
 
   // Load context from localStorage on mount
   useEffect(() => {
