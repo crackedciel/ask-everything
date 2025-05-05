@@ -5,16 +5,49 @@ import ChatInput from "./chat/ChatInput";
 import { MessageList } from "./chat/message/MessageList";
 import { useUpProvider } from "./upProvider";
 import {  addMessage, selectAllMessages, setMessages } from "@/store/room-reducer";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
 import { Message } from "@/types/types";
 import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ERC725 } from '@erc725/erc725.js';
+import erc725schema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 
 export function Chat() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const roomId = 'default';
   const chatInputRef = useRef<{ clear: () => void } | null>(null);
+
+  const IPFS_GATEWAY = 'https://api.universalprofile.cloud/ipfs/';
+  const RPC_ENDPOINT_MAINNET = 'https://rpc.mainnet.lukso.network';
+
+  const [profileData, setProfileData] = useState<{
+          imgUrl: string;
+          fullName: string;
+          background: string;
+          profileAddress: string;
+          isLoading: boolean;
+      }>({
+          imgUrl: 'https://tools-web-components.pages.dev/images/sample-avatar.jpg',
+          fullName: 'username',
+          background: 'https://tools-web-components.pages.dev/images/sample-background.jpg',
+          profileAddress: '0x1234567890111213141516171819202122232425',
+          isLoading: false,
+      });
+
+  const [userData, setUserData] = useState<{
+          imgUrl: string;
+          fullName: string;
+          background: string;
+          profileAddress: string;
+          isLoading: boolean;
+      }>({
+          imgUrl: 'https://tools-web-components.pages.dev/images/sample-avatar.jpg',
+          fullName: 'username',
+          background: 'https://tools-web-components.pages.dev/images/sample-background.jpg',
+          profileAddress: '0x1234567890111213141516171819202122232425',
+          isLoading: false,
+      });
 
   const firstMessage = useAppSelector(state => state.chat.firstMessage);
   const messages: Message[] = useAppSelector(state => state.room.messages[roomId] || []);
@@ -58,7 +91,9 @@ export function Chat() {
       address: contextAccounts[0],
       timestamp: new Date().toISOString(),
       isError: true,
-      isAssistant: true
+      isAssistant: true,
+      profileImage: profileData.imgUrl,
+      username: profileData.fullName
     }}));
   }
 
@@ -73,6 +108,8 @@ export function Chat() {
       address: accounts[0],
       timestamp: new Date().toISOString(),
       isAssistant: false,
+      profileImage: userData.imgUrl,
+      username: userData.fullName
     };
 
     dispatchAddMessage(userMessage);
@@ -95,6 +132,96 @@ export function Chat() {
   const navigateToSettings = () => {
     router.push('/settings');
   };
+
+  useEffect(() => {
+    async function fetchProfileImage() {
+        if (!accounts || accounts.length) return;
+
+        setProfileData(prev => ({ ...prev, isLoading: true }));
+
+        try {
+            const config = { ipfsGateway: IPFS_GATEWAY };
+            const rpcEndpoint = RPC_ENDPOINT_MAINNET;
+            const profile = new ERC725(erc725schema, accounts[0], rpcEndpoint, config);
+            const fetchedData = await profile.fetchData('LSP3Profile');
+
+            if (
+                fetchedData?.value &&
+                typeof fetchedData.value === 'object' &&
+                'LSP3Profile' in fetchedData.value
+            ) {
+                const profileImagesIPFS = fetchedData.value.LSP3Profile.profileImage;
+                const fullName = fetchedData.value.LSP3Profile.name;
+                const profileBackground = fetchedData.value.LSP3Profile.backgroundImage;
+
+                setProfileData({
+                    fullName: fullName || '',
+                    imgUrl: profileImagesIPFS?.[0]?.url
+                        ? profileImagesIPFS[0].url.replace('ipfs://', IPFS_GATEWAY)
+                        : 'https://tools-web-components.pages.dev/images/sample-avatar.jpg',
+                    background: profileBackground?.[0]?.url
+                        ? profileBackground[0].url.replace('ipfs://', IPFS_GATEWAY)
+                        : '',
+                    profileAddress: accounts[0],
+                    isLoading: false,
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching profile image:', error);
+            setProfileData(prev => ({
+                ...prev,
+                isLoading: false,
+            }));
+        }
+    }
+
+    fetchProfileImage();
+}, [accounts]);
+
+useEffect(() => {
+  async function fetchUserImage() {
+      if (!contextAccounts || contextAccounts.length) return;
+
+      setUserData(prev => ({ ...prev, isLoading: true }));
+
+      try {
+          const config = { ipfsGateway: IPFS_GATEWAY };
+          const rpcEndpoint = RPC_ENDPOINT_MAINNET;
+          const profile = new ERC725(erc725schema, contextAccounts[0], rpcEndpoint, config);
+          const fetchedData = await profile.fetchData('LSP3Profile');
+
+          if (
+              fetchedData?.value &&
+              typeof fetchedData.value === 'object' &&
+              'LSP3Profile' in fetchedData.value
+          ) {
+              const profileImagesIPFS = fetchedData.value.LSP3Profile.profileImage;
+              const fullName = fetchedData.value.LSP3Profile.name;
+              const profileBackground = fetchedData.value.LSP3Profile.backgroundImage;
+
+              setUserData({
+                  fullName: fullName || '',
+                  imgUrl: profileImagesIPFS?.[0]?.url
+                      ? profileImagesIPFS[0].url.replace('ipfs://', IPFS_GATEWAY)
+                      : 'https://tools-web-components.pages.dev/images/sample-avatar.jpg',
+                  background: profileBackground?.[0]?.url
+                      ? profileBackground[0].url.replace('ipfs://', IPFS_GATEWAY)
+                      : '',
+                  profileAddress: contextAccounts[0],
+                  isLoading: false,
+              });
+          }
+      } catch (error) {
+          console.error('Error fetching profile image:', error);
+          setUserData(prev => ({
+              ...prev,
+              isLoading: false,
+          }));
+      }
+  }
+
+  fetchUserImage();
+}, [contextAccounts]);
 
   return (
     <div key={'default'} className="flex flex-col h-[100dvh] w-full max-w-5xl mx-auto">
