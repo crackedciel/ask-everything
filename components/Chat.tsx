@@ -301,10 +301,10 @@ useEffect(() => {
         <div className="absolute top-4 right-4 z-10">
           <button 
             onClick={navigateToSettings}
-            className="p-2 rounded-full hover:bg-zinc-800/40 transition-colors"
+            className="p-2 transition-colors text-gray-400 hover:text-gray-200"
             aria-label="Settings"
           >
-            <Settings size={20} className="text-gray-300" />
+            <Settings size={20} />
           </button>
         </div>
       )}
