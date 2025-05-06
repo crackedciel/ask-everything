@@ -46,7 +46,7 @@ export function Chat() {
           isLoading: boolean;
       }>({
           imgUrl: 'https://tools-web-components.pages.dev/images/sample-avatar.jpg',
-          fullName: 'username',
+          fullName: '',
           background: 'https://tools-web-components.pages.dev/images/sample-background.jpg',
           profileAddress: '0x1234567890111213141516171819202122232425',
           isLoading: false,
@@ -183,7 +183,7 @@ export function Chat() {
       if (agentContext) {
         conversationHistory.unshift({
           role: 'system',
-          content: agentContext,
+          content: buildSystemPrompt(agentContext),
         });
       }
 
@@ -202,6 +202,22 @@ export function Chat() {
   const navigateToSettings = () => {
     router.push('/settings');
   };
+
+  const buildSystemPrompt = (
+    agentContext: string
+  ): string => {
+    let context = '';
+    if (profileData.fullName !== 'assistant') {
+      context += `\n\n You are named ${profileData.fullName}`
+    }
+     context += agentContext;
+
+     if (userData.fullName !== '') {
+      context += `The user you are talking to is named ${userData.fullName}`
+     }
+
+     return context;
+  }
 
   useEffect(() => {
     async function fetchProfileImage() {
