@@ -11,9 +11,18 @@ import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { useAgentContext } from "@/hooks/useAgentContext";
-import ERC725 from "@erc725/erc725.js";
 import {Message as AIMessage} from '../app/api/types/ai'
 import erc725schema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
+import { RPC_URL } from "@/lib/constants";
+import { BrowserProvider, Contract, formatEther } from "ethers";
+import { ERC725 } from "@erc725/erc725.js";
+import lsp4Schema from "@erc725/erc725.js/schemas/LSP4DigitalAsset.json";
+import lsp8Artifact from "../lib/abis/lsp8.json";
+import lsp3ProfileSchema from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
+
+import pLimit from "p-limit";
+
+const limit = pLimit(2);
 
 export function Chat() {
   const router = useRouter();
@@ -51,12 +60,15 @@ export function Chat() {
           profileAddress: '0x1234567890111213141516171819202122232425',
           isLoading: false,
       });
+  
+  const [profileAssets, setProfileAssets] = useState<string>('');
+  const [userAssets, setUserAssets] = useState<string>('');
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const firstMessage = useAppSelector(state => state.chat.firstMessage);
   const messages: Message[] = useAppSelector(state => state.room.messages[roomId] || []);
 
-  const { accounts, contextAccounts, chainId } =
+  const { accounts, contextAccounts, chainId, provider } =
     useUpProvider();
   const messageListContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -203,17 +215,90 @@ export function Chat() {
     router.push('/settings');
   };
 
+  const fetchProfileAssets = async (address: string) => {
+    const erc725js = new ERC725(lsp3ProfileSchema, address, RPC_URL, {
+      ipfsGateway: IPFS_GATEWAY,
+    });
+
+    try {
+      if (!provider) return;
+      const browserProvider = new BrowserProvider(provider);
+
+      const balance = await browserProvider.getBalance(address);
+      const receivedAssetsDataKey = await erc725js.fetchData(
+        "LSP5ReceivedAssets[]",
+      );
+      const assets = await Promise.all(
+        (receivedAssetsDataKey.value as string[]).map((value: string) =>
+          limit(async () => {
+            try {
+              const contract = new Contract(value, lsp8Artifact.abi, browserProvider);
+              const balance = await contract.balanceOf(address);
+
+              const myAsset = new ERC725(lsp4Schema, value, RPC_URL, {
+                ipfsGateway: IPFS_GATEWAY,
+              });
+              const tokenType = await myAsset.getData("LSP4TokenType");
+              const tokenName = await myAsset.getData("LSP4TokenName");
+              const assetMetadata = await myAsset.fetchData("LSP4Metadata");
+
+              const assetImages: any[] = (
+                assetMetadata.value as any
+              )?.LSP4Metadata?.images.flat();
+              const assetIcons: any[] = (
+                assetMetadata.value as any
+              )?.LSP4Metadata?.icon.flat();
+
+              const selectedImages = (
+                assetImages.length > 0 ? assetImages : assetIcons
+              ).map((image: any) => {
+                return image.url.replace("ipfs://", IPFS_GATEWAY + "/");
+              });
+
+              return {
+                address: value,
+                name: tokenName.value,
+                images: selectedImages,
+                type: tokenType.value,
+                balance:
+                  tokenType.value === 0
+                    ? Number(formatEther(balance))
+                    : Number(balance),
+              };
+            } catch (error: any) {
+              return null;
+            }
+          }),
+        ),
+      );
+
+      return {
+        balance: formatEther(balance),
+        assets,
+      };
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  };
+
   const buildSystemPrompt = (
     agentContext: string
   ): string => {
     let context = '';
     if (profileData.fullName !== 'assistant') {
-      context += `\n\n You are named ${profileData.fullName}`
+      context += `You are named ${profileData.fullName}\n`
+    }
+    if (profileAssets) {
+      context += `You possess the following assets in your Lukso account: ${profileAssets}\n`
     }
      context += agentContext;
 
      if (userData.fullName !== '') {
-      context += `The user you are talking to is named ${userData.fullName}`
+      context += `\n\nThe user you are talking to is named ${userData.fullName}\n`
+     }
+     if (userAssets) {
+      context += `The user possess the following assets in his Lukso account: ${userAssets}`
      }
 
      return context;
@@ -263,7 +348,19 @@ export function Chat() {
         }
     }
 
+    const fetchAssets = async () => {
+      if (!contextAccounts || !contextAccounts.length) return;
+
+      try {
+        const assets = await fetchProfileAssets(contextAccounts[0]);
+        setProfileAssets(JSON.stringify(assets));
+      } catch(e) {
+        console.error(e);
+      }
+    }
+
     fetchProfileImage();
+    fetchAssets();
 }, [contextAccounts]);
 
 useEffect(() => {
@@ -308,7 +405,19 @@ useEffect(() => {
       }
   }
 
+  const fetchAssets = async () => {
+    if (!accounts || !accounts.length) return;
+
+    try {
+      const assets = await fetchProfileAssets(accounts[0]);
+      setUserAssets(JSON.stringify(assets));
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
   fetchUserImage();
+  fetchAssets();
 }, [accounts]);
 
   return (
